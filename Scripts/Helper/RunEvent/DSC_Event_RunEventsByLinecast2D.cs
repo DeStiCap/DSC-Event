@@ -30,8 +30,9 @@ namespace DSC.Event.Helper
         [SerializeField] protected UnityEvent m_hNotTargetTagHitEvent;
 
         [Header("Event Send Data")]
-        [SerializeField] protected EventGameObject m_hHitEventGameObject;
-        [SerializeField] protected EventGameObject m_hNotTargetTagHitEventGameObject;
+        [SerializeField] protected UnityEvent<GameObject> m_hHitEventGameObject;
+        [SerializeField] protected UnityEvent<GameObject> m_hNotTargetTagHitEventGameObject;
+        [SerializeField] protected UnityEvent<RaycastHit2D> m_hHitEventRaycast;
 
 #if UNITY_EDITOR
         [Header("Debug")]
@@ -98,6 +99,7 @@ namespace DSC.Event.Helper
 
                 m_hHitEvent?.Invoke();
                 m_hHitEventGameObject?.Invoke(hHit.transform.gameObject);
+                m_hHitEventRaycast?.Invoke(hHit);
             }
             else
             {

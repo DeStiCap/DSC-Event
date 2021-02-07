@@ -1,3 +1,7 @@
+## [0.4.0-preview.1] -2020-02-07
+- Change minimum Unity version requirement to 2020.2
+- DSC_Event_RunEventsByLinecast 3D/2D now send RaycastHit data.
+
 ## [0.3.0-preview.1] -2020-07-03
 - Change minimum Unity version requirement to 2019.4
 - Remove Unity Input dependencies.
