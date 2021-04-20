@@ -1,5 +1,6 @@
 {
     "name": "DSC.Event",
+    "rootNamespace": "DSC.Event",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

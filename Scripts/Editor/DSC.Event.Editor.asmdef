@@ -1,5 +1,6 @@
 {
     "name": "DSC.Event.Editor",
+    "rootNamespace": "DSC.Event.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"
