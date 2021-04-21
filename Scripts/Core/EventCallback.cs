@@ -1,28 +1,18 @@
 ﻿using System.Collections.Generic;
 using UnityEngine.Events;
-
-#region  Enum
-
-public enum EventOrder
-{
-    Normal,
-    PreNormal,
-    PostNormal,
-    PreEarly,
-    Early,
-    PostEalry,
-    PreLate,
-    Late,
-    PostLate,
-}
-
-#endregion
+using DSC.Core;
 
 namespace DSC.Event
 {
     public class EventCallback<EventKey>
     {
-        Dictionary<EventKey, Dictionary<EventOrder, UnityAction>> m_dicActData;
+        #region Variable
+
+        protected Dictionary<EventKey, Dictionary<EventOrder, UnityAction>> m_dicActData;
+
+        #endregion
+
+        #region Main
 
         /// <summary>
         /// Add callback to this event.
@@ -40,30 +30,9 @@ namespace DSC.Event
             MainAdd(eventKey, action, orderType);
         }
 
-        void MainAdd(EventKey eventKey, UnityAction action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainAdd(EventKey hKey, UnityAction hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            CreateDictionaryDataIfNull();
-
-            if (m_dicActData.TryGetValue(eventKey, out Dictionary<EventOrder, UnityAction> hOutData))
-            {
-                if (hOutData.TryGetValue(eOrderType, out UnityAction hOutAction))
-                {
-                    hOutAction += action;
-                    hOutData[eOrderType] = hOutAction;
-                }
-                else
-                {
-                    hOutData.Add(eOrderType, action);
-                }
-
-                m_dicActData[eventKey] = hOutData;
-            }
-            else
-            {
-                var hNewData = new Dictionary<EventOrder, UnityAction>();
-                hNewData.Add(eOrderType, action);
-                m_dicActData.Add(eventKey, hNewData);
-            }
+            AddThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -82,20 +51,9 @@ namespace DSC.Event
             MainRemove(eventKey, action, orderType);
         }
 
-        void MainRemove(EventKey eventKey, UnityAction action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainRemove(EventKey hKey, UnityAction hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            if (!hData.ContainsKey(eOrderType))
-                return;
-
-            var hAction = hData[eOrderType];
-            hAction -= action;
-            hData[eOrderType] = hAction;
-
-            m_dicActData[eventKey] = hData;
+            RemoveThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -112,86 +70,126 @@ namespace DSC.Event
         /// <summary>
         /// Clear all callback in this event.
         /// </summary>
-        public void ClearEvent(EventKey eventKey)
+        public virtual void ClearEvent(EventKey hKey)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            hData.Clear();
-            m_dicActData[eventKey] = hData;
+            ClearThisEvent(hKey);
         }
 
         /// <summary>
         /// Run event callback.
         /// </summary>
-        public void Run(EventKey eventKey)
+        public virtual void Run(EventKey hKey)
         {
-            if (!HasKeyInData(eventKey))
+            RunThisEvent(hKey);
+        }
+
+        #endregion
+
+        #region Helper
+
+        protected void AddThisEvent(EventKey hKey, UnityAction hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            m_dicActData ??= new Dictionary<EventKey, Dictionary<EventOrder, UnityAction>>();
+
+            if (m_dicActData.TryGetValue(hKey, out var hOutData))
+            {
+                if (hOutData.TryGetValue(eOrderType, out var hOutAction))
+                {
+                    hOutAction += hAction;
+                    hOutData[eOrderType] = hOutAction;
+                }
+                else
+                {
+                    hOutData.Add(eOrderType, hAction);
+                }
+
+                m_dicActData[hKey] = hOutData;
+            }
+            else
+            {
+                var hNewData = new Dictionary<EventOrder, UnityAction>();
+                hNewData.Add(eOrderType, hAction);
+                m_dicActData.Add(hKey, hNewData);
+            }
+        }
+
+        protected void RemoveThisEvent(EventKey hKey, UnityAction hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            if (!m_dicActData.HasKey(hKey))
                 return;
 
-            var hData = m_dicActData[eventKey];
+            var hData = m_dicActData[hKey];
+            if (!hData.ContainsKey(eOrderType))
+                return;
 
-            if (hData.TryGetValue(EventOrder.PreEarly, out UnityAction hPreEarlyAction))
+            var hAct = hData[eOrderType];
+            hAct -= hAction;
+            hData[eOrderType] = hAct;
+
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void ClearThisEvent(EventKey hKey)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+            hData.Clear();
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void RunThisEvent(EventKey hKey)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+
+            if (hData.TryGetValue(EventOrder.PreEarly, out var hPreEarlyAction))
             {
                 hPreEarlyAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.Early, out UnityAction hEarlyAction))
+            if (hData.TryGetValue(EventOrder.Early, out var hEarlyAction))
             {
                 hEarlyAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.PostEalry, out UnityAction hPostEarlyAction))
+            if (hData.TryGetValue(EventOrder.PostEalry, out var hPostEarlyAction))
             {
                 hPostEarlyAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.PreNormal, out UnityAction hPreNormalAction))
+            if (hData.TryGetValue(EventOrder.PreNormal, out var hPreNormalAction))
             {
                 hPreNormalAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.Normal, out UnityAction hNormalAction))
+            if (hData.TryGetValue(EventOrder.Normal, out var hNormalAction))
             {
                 hNormalAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.PostNormal, out UnityAction hPostNormalAction))
+            if (hData.TryGetValue(EventOrder.PostNormal, out var hPostNormalAction))
             {
                 hPostNormalAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.PreLate, out UnityAction hPreLateAction))
+            if (hData.TryGetValue(EventOrder.PreLate, out var hPreLateAction))
             {
                 hPreLateAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.Late, out UnityAction hLateAction))
+            if (hData.TryGetValue(EventOrder.Late, out var hLateAction))
             {
                 hLateAction?.Invoke();
             }
 
-            if (hData.TryGetValue(EventOrder.PostLate, out UnityAction hPostLateAction))
+            if (hData.TryGetValue(EventOrder.PostLate, out var hPostLateAction))
             {
                 hPostLateAction?.Invoke();
             }
-        }
-
-        #region Helper
-
-        void CreateDictionaryDataIfNull()
-        {
-            if (m_dicActData == null)
-                m_dicActData = new Dictionary<EventKey, Dictionary<EventOrder, UnityAction>>();
-        }
-
-        bool HasKeyInData(EventKey eEventKey)
-        {
-            if (m_dicActData == null || m_dicActData.Count <= 0 || !m_dicActData.ContainsKey(eEventKey))
-                return false;
-
-            return true;
         }
 
         #endregion
@@ -199,7 +197,13 @@ namespace DSC.Event
 
     public class EventCallback<EventKey, T0>
     {
-        Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0>>> m_dicActData;
+        #region Variable
+
+        protected Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0>>> m_dicActData;
+
+        #endregion
+
+        #region Main
 
         /// <summary>
         /// Add callback to this event.
@@ -217,30 +221,9 @@ namespace DSC.Event
             MainAdd(eventKey, action, orderType);
         }
 
-        void MainAdd(EventKey eventKey, UnityAction<T0> action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainAdd(EventKey hKey, UnityAction<T0> hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            CreateDictionaryDataIfNull();
-
-            if (m_dicActData.TryGetValue(eventKey, out Dictionary<EventOrder, UnityAction<T0>> hOutData))
-            {
-                if (hOutData.TryGetValue(eOrderType, out UnityAction<T0> hOutAction))
-                {
-                    hOutAction += action;
-                    hOutData[eOrderType] = hOutAction;
-                }
-                else
-                {
-                    hOutData.Add(eOrderType, action);
-                }
-
-                m_dicActData[eventKey] = hOutData;
-            }
-            else
-            {
-                var hNewData = new Dictionary<EventOrder, UnityAction<T0>>();
-                hNewData.Add(eOrderType, action);
-                m_dicActData.Add(eventKey, hNewData);
-            }
+            AddThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -259,20 +242,9 @@ namespace DSC.Event
             MainRemove(eventKey, action, orderType);
         }
 
-        void MainRemove(EventKey eventKey, UnityAction<T0> action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainRemove(EventKey hKey, UnityAction<T0> hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            if (!hData.ContainsKey(eOrderType))
-                return;
-
-            var hAction = hData[eOrderType];
-            hAction -= action;
-            hData[eOrderType] = hAction;
-
-            m_dicActData[eventKey] = hData;
+            RemoveThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -289,86 +261,126 @@ namespace DSC.Event
         /// <summary>
         /// Clear all callback in this event.
         /// </summary>
-        public void ClearEvent(EventKey eventKey)
+        public virtual void ClearEvent(EventKey hKey)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            hData.Clear();
-            m_dicActData[eventKey] = hData;
+            ClearThisEvent(hKey);
         }
 
         /// <summary>
         /// Run event callback.
         /// </summary>
-        public void Run(EventKey eventKey, T0 arg0)
+        public virtual void Run(EventKey hKey, T0 arg0)
         {
-            if (!HasKeyInData(eventKey))
+            RunThisEvent(hKey, arg0);
+        }
+
+        #endregion
+
+        #region Helper
+
+        protected void AddThisEvent(EventKey hKey, UnityAction<T0> hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            m_dicActData ??= new Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0>>>();
+
+            if (m_dicActData.TryGetValue(hKey, out var hOutData))
+            {
+                if (hOutData.TryGetValue(eOrderType, out var hOutAction))
+                {
+                    hOutAction += hAction;
+                    hOutData[eOrderType] = hOutAction;
+                }
+                else
+                {
+                    hOutData.Add(eOrderType, hAction);
+                }
+
+                m_dicActData[hKey] = hOutData;
+            }
+            else
+            {
+                var hNewData = new Dictionary<EventOrder, UnityAction<T0>>();
+                hNewData.Add(eOrderType, hAction);
+                m_dicActData.Add(hKey, hNewData);
+            }
+        }
+
+        protected void RemoveThisEvent(EventKey hKey, UnityAction<T0> hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            if (!m_dicActData.HasKey(hKey))
                 return;
 
-            var hData = m_dicActData[eventKey];
+            var hData = m_dicActData[hKey];
+            if (!hData.ContainsKey(eOrderType))
+                return;
 
-            if (hData.TryGetValue(EventOrder.PreEarly, out UnityAction<T0> hPreEarlyAction))
+            var hAct = hData[eOrderType];
+            hAct -= hAction;
+            hData[eOrderType] = hAct;
+
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void ClearThisEvent(EventKey hKey)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+            hData.Clear();
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void RunThisEvent(EventKey hKey, T0 arg0)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+
+            if (hData.TryGetValue(EventOrder.PreEarly, out var hPreEarlyAction))
             {
                 hPreEarlyAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.Early, out UnityAction<T0> hEarlyAction))
+            if (hData.TryGetValue(EventOrder.Early, out var hEarlyAction))
             {
                 hEarlyAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.PostEalry, out UnityAction<T0> hPostEarlyAction))
+            if (hData.TryGetValue(EventOrder.PostEalry, out var hPostEarlyAction))
             {
                 hPostEarlyAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.PreNormal, out UnityAction<T0> hPreNormalAction))
+            if (hData.TryGetValue(EventOrder.PreNormal, out var hPreNormalAction))
             {
                 hPreNormalAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.Normal, out UnityAction<T0> hNormalAction))
+            if (hData.TryGetValue(EventOrder.Normal, out var hNormalAction))
             {
                 hNormalAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.PostNormal, out UnityAction<T0> hPostNormalAction))
+            if (hData.TryGetValue(EventOrder.PostNormal, out var hPostNormalAction))
             {
                 hPostNormalAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.PreLate, out UnityAction<T0> hPreLateAction))
+            if (hData.TryGetValue(EventOrder.PreLate, out var hPreLateAction))
             {
                 hPreLateAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.Late, out UnityAction<T0> hLateAction))
+            if (hData.TryGetValue(EventOrder.Late, out var hLateAction))
             {
                 hLateAction?.Invoke(arg0);
             }
 
-            if (hData.TryGetValue(EventOrder.PostLate, out UnityAction<T0> hPostLateAction))
+            if (hData.TryGetValue(EventOrder.PostLate, out var hPostLateAction))
             {
                 hPostLateAction?.Invoke(arg0);
             }
-        }
-
-        #region Helper
-
-        void CreateDictionaryDataIfNull()
-        {
-            if (m_dicActData == null)
-                m_dicActData = new Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0>>>();
-        }
-
-        bool HasKeyInData(EventKey eEventKey)
-        {
-            if (m_dicActData == null || m_dicActData.Count <= 0 || !m_dicActData.ContainsKey(eEventKey))
-                return false;
-
-            return true;
         }
 
         #endregion
@@ -376,7 +388,13 @@ namespace DSC.Event
 
     public class EventCallback<EventKey, T0, T1>
     {
-        Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1>>> m_dicActData;
+        #region Variable
+
+        protected Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1>>> m_dicActData;
+
+        #endregion
+
+        #region Main
 
         /// <summary>
         /// Add callback to this event.
@@ -394,30 +412,9 @@ namespace DSC.Event
             MainAdd(eventKey, action, orderType);
         }
 
-        void MainAdd(EventKey eventKey, UnityAction<T0, T1> action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainAdd(EventKey hKey, UnityAction<T0, T1> hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            CreateDictionaryDataIfNull();
-
-            if (m_dicActData.TryGetValue(eventKey, out Dictionary<EventOrder, UnityAction<T0, T1>> hOutData))
-            {
-                if (hOutData.TryGetValue(eOrderType, out UnityAction<T0, T1> hOutAction))
-                {
-                    hOutAction += action;
-                    hOutData[eOrderType] = hOutAction;
-                }
-                else
-                {
-                    hOutData.Add(eOrderType, action);
-                }
-
-                m_dicActData[eventKey] = hOutData;
-            }
-            else
-            {
-                var hNewData = new Dictionary<EventOrder, UnityAction<T0, T1>>();
-                hNewData.Add(eOrderType, action);
-                m_dicActData.Add(eventKey, hNewData);
-            }
+            AddThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -436,20 +433,9 @@ namespace DSC.Event
             MainRemove(eventKey, action, orderType);
         }
 
-        void MainRemove(EventKey eventKey, UnityAction<T0, T1> action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainRemove(EventKey hKey, UnityAction<T0, T1> hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            if (!hData.ContainsKey(eOrderType))
-                return;
-
-            var hAction = hData[eOrderType];
-            hAction -= action;
-            hData[eOrderType] = hAction;
-
-            m_dicActData[eventKey] = hData;
+            RemoveThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -466,86 +452,126 @@ namespace DSC.Event
         /// <summary>
         /// Clear all callback in this event.
         /// </summary>
-        public void ClearEvent(EventKey eventKey)
+        public virtual void ClearEvent(EventKey hKey)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            hData.Clear();
-            m_dicActData[eventKey] = hData;
+            ClearThisEvent(hKey);
         }
 
         /// <summary>
         /// Run event callback.
         /// </summary>
-        public void Run(EventKey eventKey, T0 arg0, T1 arg1)
+        public virtual void Run(EventKey hKey, T0 arg0, T1 arg1)
         {
-            if (!HasKeyInData(eventKey))
+            RunThisEvent(hKey, arg0, arg1);
+        }
+
+        #endregion
+
+        #region Helper
+
+        protected void AddThisEvent(EventKey hKey, UnityAction<T0, T1> hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            m_dicActData ??= new Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1>>>();
+
+            if (m_dicActData.TryGetValue(hKey, out var hOutData))
+            {
+                if (hOutData.TryGetValue(eOrderType, out var hOutAction))
+                {
+                    hOutAction += hAction;
+                    hOutData[eOrderType] = hOutAction;
+                }
+                else
+                {
+                    hOutData.Add(eOrderType, hAction);
+                }
+
+                m_dicActData[hKey] = hOutData;
+            }
+            else
+            {
+                var hNewData = new Dictionary<EventOrder, UnityAction<T0, T1>>();
+                hNewData.Add(eOrderType, hAction);
+                m_dicActData.Add(hKey, hNewData);
+            }
+        }
+
+        protected void RemoveThisEvent(EventKey hKey, UnityAction<T0, T1> hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            if (!m_dicActData.HasKey(hKey))
                 return;
 
-            var hData = m_dicActData[eventKey];
+            var hData = m_dicActData[hKey];
+            if (!hData.ContainsKey(eOrderType))
+                return;
 
-            if (hData.TryGetValue(EventOrder.PreEarly, out UnityAction<T0, T1> hPreEarlyAction))
+            var hAct = hData[eOrderType];
+            hAct -= hAction;
+            hData[eOrderType] = hAct;
+
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void ClearThisEvent(EventKey hKey)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+            hData.Clear();
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void RunThisEvent(EventKey hKey, T0 arg0, T1 arg1)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+
+            if (hData.TryGetValue(EventOrder.PreEarly, out var hPreEarlyAction))
             {
                 hPreEarlyAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.Early, out UnityAction<T0, T1> hEarlyAction))
+            if (hData.TryGetValue(EventOrder.Early, out var hEarlyAction))
             {
                 hEarlyAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.PostEalry, out UnityAction<T0, T1> hPostEarlyAction))
+            if (hData.TryGetValue(EventOrder.PostEalry, out var hPostEarlyAction))
             {
                 hPostEarlyAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.PreNormal, out UnityAction<T0, T1> hPreNormalAction))
+            if (hData.TryGetValue(EventOrder.PreNormal, out var hPreNormalAction))
             {
                 hPreNormalAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.Normal, out UnityAction<T0, T1> hNormalAction))
+            if (hData.TryGetValue(EventOrder.Normal, out var hNormalAction))
             {
                 hNormalAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.PostNormal, out UnityAction<T0, T1> hPostNormalAction))
+            if (hData.TryGetValue(EventOrder.PostNormal, out var hPostNormalAction))
             {
                 hPostNormalAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.PreLate, out UnityAction<T0, T1> hPreLateAction))
+            if (hData.TryGetValue(EventOrder.PreLate, out var hPreLateAction))
             {
                 hPreLateAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.Late, out UnityAction<T0, T1> hLateAction))
+            if (hData.TryGetValue(EventOrder.Late, out var hLateAction))
             {
                 hLateAction?.Invoke(arg0, arg1);
             }
 
-            if (hData.TryGetValue(EventOrder.PostLate, out UnityAction<T0, T1> hPostLateAction))
+            if (hData.TryGetValue(EventOrder.PostLate, out var hPostLateAction))
             {
                 hPostLateAction?.Invoke(arg0, arg1);
             }
-        }
-
-        #region Helper
-
-        void CreateDictionaryDataIfNull()
-        {
-            if (m_dicActData == null)
-                m_dicActData = new Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1>>>();
-        }
-
-        bool HasKeyInData(EventKey eEventKey)
-        {
-            if (m_dicActData == null || m_dicActData.Count <= 0 || !m_dicActData.ContainsKey(eEventKey))
-                return false;
-
-            return true;
         }
 
         #endregion
@@ -553,7 +579,13 @@ namespace DSC.Event
 
     public class EventCallback<EventKey, T0, T1, T2>
     {
-        Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1, T2>>> m_dicActData;
+        #region Variable
+
+        protected Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1, T2>>> m_dicActData;
+
+        #endregion
+
+        #region Main
 
         /// <summary>
         /// Add callback to this event.
@@ -571,30 +603,9 @@ namespace DSC.Event
             MainAdd(eventKey, action, orderType);
         }
 
-        void MainAdd(EventKey eventKey, UnityAction<T0, T1, T2> action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainAdd(EventKey hKey, UnityAction<T0, T1, T2> hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            CreateDictionaryDataIfNull();
-
-            if (m_dicActData.TryGetValue(eventKey, out Dictionary<EventOrder, UnityAction<T0, T1, T2>> hOutData))
-            {
-                if (hOutData.TryGetValue(eOrderType, out UnityAction<T0, T1, T2> hOutAction))
-                {
-                    hOutAction += action;
-                    hOutData[eOrderType] = hOutAction;
-                }
-                else
-                {
-                    hOutData.Add(eOrderType, action);
-                }
-
-                m_dicActData[eventKey] = hOutData;
-            }
-            else
-            {
-                var hNewData = new Dictionary<EventOrder, UnityAction<T0, T1, T2>>();
-                hNewData.Add(eOrderType, action);
-                m_dicActData.Add(eventKey, hNewData);
-            }
+            AddThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -613,20 +624,9 @@ namespace DSC.Event
             MainRemove(eventKey, action, orderType);
         }
 
-        void MainRemove(EventKey eventKey, UnityAction<T0, T1, T2> action, EventOrder eOrderType = EventOrder.Normal)
+        protected virtual void MainRemove(EventKey hKey, UnityAction<T0, T1, T2> hAction, EventOrder eOrderType = EventOrder.Normal)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            if (!hData.ContainsKey(eOrderType))
-                return;
-
-            var hAction = hData[eOrderType];
-            hAction -= action;
-            hData[eOrderType] = hAction;
-
-            m_dicActData[eventKey] = hData;
+            RemoveThisEvent(hKey, hAction, eOrderType);
         }
 
         /// <summary>
@@ -643,88 +643,129 @@ namespace DSC.Event
         /// <summary>
         /// Clear all callback in this event.
         /// </summary>
-        public void ClearEvent(EventKey eventKey)
+        public virtual void ClearEvent(EventKey hKey)
         {
-            if (!HasKeyInData(eventKey))
-                return;
-
-            var hData = m_dicActData[eventKey];
-            hData.Clear();
-            m_dicActData[eventKey] = hData;
+            ClearThisEvent(hKey);
         }
 
         /// <summary>
         /// Run event callback.
         /// </summary>
-        public void Run(EventKey eventKey, T0 arg0, T1 arg1, T2 arg2)
+        public virtual void Run(EventKey hKey, T0 arg0, T1 arg1, T2 arg2)
         {
-            if (!HasKeyInData(eventKey))
+            RunThisEvent(hKey, arg0, arg1, arg2);
+        }
+
+        #endregion
+
+        #region Helper
+
+        protected void AddThisEvent(EventKey hKey, UnityAction<T0, T1, T2> hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            m_dicActData ??= new Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1, T2>>>();
+
+            if (m_dicActData.TryGetValue(hKey, out var hOutData))
+            {
+                if (hOutData.TryGetValue(eOrderType, out var hOutAction))
+                {
+                    hOutAction += hAction;
+                    hOutData[eOrderType] = hOutAction;
+                }
+                else
+                {
+                    hOutData.Add(eOrderType, hAction);
+                }
+
+                m_dicActData[hKey] = hOutData;
+            }
+            else
+            {
+                var hNewData = new Dictionary<EventOrder, UnityAction<T0, T1, T2>>();
+                hNewData.Add(eOrderType, hAction);
+                m_dicActData.Add(hKey, hNewData);
+            }
+        }
+
+        protected void RemoveThisEvent(EventKey hKey, UnityAction<T0, T1, T2> hAction, EventOrder eOrderType = EventOrder.Normal)
+        {
+            if (!m_dicActData.HasKey(hKey))
                 return;
 
-            var hData = m_dicActData[eventKey];
+            var hData = m_dicActData[hKey];
+            if (!hData.ContainsKey(eOrderType))
+                return;
 
-            if (hData.TryGetValue(EventOrder.PreEarly, out UnityAction<T0, T1, T2> hPreEarlyAction))
+            var hAct = hData[eOrderType];
+            hAct -= hAction;
+            hData[eOrderType] = hAct;
+
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void ClearThisEvent(EventKey hKey)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+            hData.Clear();
+            m_dicActData[hKey] = hData;
+        }
+
+        protected void RunThisEvent(EventKey hKey, T0 arg0, T1 arg1, T2 arg2)
+        {
+            if (!m_dicActData.HasKey(hKey))
+                return;
+
+            var hData = m_dicActData[hKey];
+
+            if (hData.TryGetValue(EventOrder.PreEarly, out var hPreEarlyAction))
             {
                 hPreEarlyAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.Early, out UnityAction<T0, T1, T2> hEarlyAction))
+            if (hData.TryGetValue(EventOrder.Early, out var hEarlyAction))
             {
                 hEarlyAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.PostEalry, out UnityAction<T0, T1, T2> hPostEarlyAction))
+            if (hData.TryGetValue(EventOrder.PostEalry, out var hPostEarlyAction))
             {
                 hPostEarlyAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.PreNormal, out UnityAction<T0, T1, T2> hPreNormalAction))
+            if (hData.TryGetValue(EventOrder.PreNormal, out var hPreNormalAction))
             {
                 hPreNormalAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.Normal, out UnityAction<T0, T1, T2> hNormalAction))
+            if (hData.TryGetValue(EventOrder.Normal, out var hNormalAction))
             {
                 hNormalAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.PostNormal, out UnityAction<T0, T1, T2> hPostNormalAction))
+            if (hData.TryGetValue(EventOrder.PostNormal, out var hPostNormalAction))
             {
                 hPostNormalAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.PreLate, out UnityAction<T0, T1, T2> hPreLateAction))
+            if (hData.TryGetValue(EventOrder.PreLate, out var hPreLateAction))
             {
                 hPreLateAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.Late, out UnityAction<T0, T1, T2> hLateAction))
+            if (hData.TryGetValue(EventOrder.Late, out var hLateAction))
             {
                 hLateAction?.Invoke(arg0, arg1, arg2);
             }
 
-            if (hData.TryGetValue(EventOrder.PostLate, out UnityAction<T0, T1, T2> hPostLateAction))
+            if (hData.TryGetValue(EventOrder.PostLate, out var hPostLateAction))
             {
                 hPostLateAction?.Invoke(arg0, arg1, arg2);
             }
         }
 
-        #region Helper
-
-        void CreateDictionaryDataIfNull()
-        {
-            if (m_dicActData == null)
-                m_dicActData = new Dictionary<EventKey, Dictionary<EventOrder, UnityAction<T0, T1, T2>>>();
-        }
-
-        bool HasKeyInData(EventKey eEventKey)
-        {
-            if (m_dicActData == null || m_dicActData.Count <= 0 || !m_dicActData.ContainsKey(eEventKey))
-                return false;
-
-            return true;
-        }
-
         #endregion
+
     }
 }

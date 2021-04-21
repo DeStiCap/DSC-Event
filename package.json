@@ -2,12 +2,12 @@
     "name": "com.dsc.event",
     "author": "DeStiCap",
     "displayName": "DSC Event",
-    "version": "0.4.1-preview.1",
+    "version": "0.4.2-preview.1",
     "unity": "2020.2",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/DeStiCap/DSC-Event.git",
-		"revision": "00bfaed92b724ed82d8cc60b1c1cbf1e84ee61ab"
+		"revision": "4addda3322237688b38061e92fe7f7e1a515b6bf"
 	},
 	"description": "Helper plugin for event in game.",
     "keywords": [

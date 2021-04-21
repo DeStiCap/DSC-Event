@@ -1,3 +1,6 @@
+## [0.4.2-preview.1] -2020-04-21
+- Add EventFlagCallback script.
+
 ## [0.4.1-preview.1] -2020-04-20
 - Add DSC.Event assembly definition root namespace.
 

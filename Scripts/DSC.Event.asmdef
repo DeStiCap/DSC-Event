@@ -1,7 +1,9 @@
 {
     "name": "DSC.Event",
     "rootNamespace": "DSC.Event",
-    "references": [],
+    "references": [
+        "GUID:acff8e849db7dec488c770445e10185e"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
