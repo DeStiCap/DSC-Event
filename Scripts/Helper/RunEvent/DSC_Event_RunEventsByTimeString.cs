@@ -1,20 +1,27 @@
-﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using DSC.Core;
+using UnityEngine;
+using UnityEngine.Events;
 
 namespace DSC.Event.Helper
 {
-    public class DSC_Event_RunEventsByTime_GameObject : MonoBehaviour
+    public class DSC_Event_RunEventsByTimeString : MonoBehaviour
     {
         #region Variable
 
         #region Variable - Inspector
-#pragma warning disable 0649
+
+#if UNITY_EDITOR
+        [TextField("Events Description", 3)]
+        [SerializeField] string m_sDescription;
+#endif
 
         [Header("Time Event")]
         [Min(0)]
         [SerializeField] protected float m_fWaitDuration;
         [SerializeField] protected EventCondition[] m_arrCondition;
-        [SerializeField] protected EventGameObject m_hEvent;
+        [SerializeField] protected UnityEvent<string> m_hEvent;
 
         [Header("Option")]
         [SerializeField] protected bool m_bRunOnlyOne = true;
@@ -31,7 +38,6 @@ namespace DSC.Event.Helper
         [ReadOnlyField]
         [SerializeField] protected bool m_bCounting;
 
-#pragma warning restore 0649
         #endregion
 
         #region Variable - Property
@@ -57,17 +63,17 @@ namespace DSC.Event.Helper
 
         public bool UseRealTime { get { return m_bUseRealTime; } set { m_bUseRealTime = value; } }
 
-        public GameObject sendGameObject { get { return m_hSendGameObject; } set { m_hSendGameObject = value; } }
+        public string sendString { get { return m_hSendString; } set { m_hSendString = value; } }
 
         #endregion
 
         protected EventConditionData m_hConditionData;
 
-        protected GameObject m_hSendGameObject;
+        protected string m_hSendString;
 
         #endregion
 
-        #region Base - Mono
+        #region Unity
 
         protected virtual void Awake()
         {
@@ -113,31 +119,31 @@ namespace DSC.Event.Helper
 
         #endregion
 
-        #region Events
+        #region Main
 
         public void ResetTimeCount()
         {
             m_fCurrentTimeCount = 0;
         }
 
-        public void StartTimeCount(GameObject hGameObject)
+        public void StartTimeCount(string sValue)
         {
-            m_hSendGameObject = hGameObject;
+            m_hSendString = sValue;
             ResetTimeCount();
             m_bCounting = true;
         }
 
         public void RunEvent()
         {
-            m_hEvent?.Invoke(m_hSendGameObject);
+            m_hEvent?.Invoke(m_hSendString);
         }
 
-        public void RunEvent(GameObject hGameObject)
+        public void RunEvent(string sValue)
         {
-            m_hEvent?.Invoke(hGameObject);
+            m_hEvent?.Invoke(sValue);
         }
 
-        public void SetEvent(EventGameObject hEvent)
+        public void SetEvent(UnityEvent<string> hEvent)
         {
             m_hEvent = hEvent;
         }
@@ -152,5 +158,6 @@ namespace DSC.Event.Helper
         }
 
         #endregion
+
     }
 }

@@ -1,3 +1,8 @@
+## [0.4.3-preview.1] -2020-05-04
+- Added DSC_Event_RunEventsByTimeString script.
+- Rename DSC_Event_RunEventsByTime_GameObject script to DSC_Event_RunEventsByTimeGameObject.
+- DSC_Event_RunEventsByTimeGameObject now has events description field.
+
 ## [0.4.2-preview.1] -2020-04-21
 - Add EventFlagCallback script.
 
