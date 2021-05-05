@@ -1,3 +1,9 @@
+## [0.4.4-preview.1] -2020-05-05
+- Added DSC_Event_RunEventsByEventString class.
+- Added StopTimeCount method in DSC_Event_RunEventsByTime class.
+- Added StopTimeCount method in DSC_Event_RunEventsByTimeGameObject class.
+- DSC_Event_RunEventsByTime now has events description field.
+
 ## [0.4.3-preview.1] -2020-05-04
 - Added DSC_Event_RunEventsByTimeString script.
 - Rename DSC_Event_RunEventsByTime_GameObject script to DSC_Event_RunEventsByTimeGameObject.

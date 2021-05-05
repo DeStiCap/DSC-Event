@@ -104,7 +104,7 @@ namespace DSC.Event.Helper
                 if (m_fCurrentTimeCount >= m_fWaitDuration)
                 {
                     if (IsPassCondition())
-                        RunEvent();
+                        RunEventImmediate();
                     else if (m_bResetCountWhenRunSuccess)
                         return;
 
@@ -120,24 +120,35 @@ namespace DSC.Event.Helper
 
         #region Main
 
+        public void StopTimeCount()
+        {
+            m_bCounting = false;
+        }
+
         public void ResetTimeCount()
         {
             m_fCurrentTimeCount = 0;
         }
 
-        public void StartTimeCount(GameObject hGameObject)
+        public void RunEvent()
+        {
+            ResetTimeCount();
+            m_bCounting = true;
+        }
+
+        public void RunEvent(GameObject hGameObject)
         {
             m_hSendGameObject = hGameObject;
             ResetTimeCount();
             m_bCounting = true;
         }
 
-        public void RunEvent()
+        public void RunEventImmediate()
         {
             m_hEvent?.Invoke(m_hSendGameObject);
         }
 
-        public void RunEvent(GameObject hGameObject)
+        public void RunEventImmediate(GameObject hGameObject)
         {
             m_hEvent?.Invoke(hGameObject);
         }

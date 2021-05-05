@@ -9,8 +9,14 @@ namespace DSC.Event.Helper
         #region Variable
 
         #region Variable - Inspector
-#pragma warning disable 0649
-        
+
+#if UNITY_EDITOR
+
+        [TextField("Events Description", 3)]
+        [SerializeField] string m_sDescription;
+
+#endif
+
         [Header("Time Event")]
         [Min(0)]
         [SerializeField] protected float m_fWaitDuration;
@@ -32,7 +38,6 @@ namespace DSC.Event.Helper
         [ReadOnlyField]
         [SerializeField] protected bool m_bCounting;
 
-#pragma warning restore 0649
         #endregion
 
         #region Variable - Property
@@ -64,7 +69,7 @@ namespace DSC.Event.Helper
 
         #endregion
 
-        #region Base - Mono
+        #region Unity
 
         protected virtual void Awake()
         {
@@ -93,10 +98,10 @@ namespace DSC.Event.Helper
             {
                 m_fCurrentTimeCount += m_bUseRealTime ? Time.unscaledDeltaTime : Time.deltaTime;
 
-                if(m_fCurrentTimeCount >= m_fWaitDuration)
+                if (m_fCurrentTimeCount >= m_fWaitDuration)
                 {
                     if (IsPassCondition())
-                        RunEvent();
+                        RunEventImmediate();
                     else if (m_bResetCountWhenRunSuccess)
                         return;
 
@@ -110,20 +115,25 @@ namespace DSC.Event.Helper
 
         #endregion
 
-        #region Events
+        #region Main
+
+        public void StopTimeCount()
+        {
+            m_bCounting = false;
+        }
 
         public void ResetTimeCount()
         {
             m_fCurrentTimeCount = 0;
         }
 
-        public void StartTimeCount()
+        public void RunEvent()
         {
             ResetTimeCount();
             m_bCounting = true;
         }
 
-        public void RunEvent()
+        public void RunEventImmediate()
         {
             m_hEvent?.Invoke();
         }

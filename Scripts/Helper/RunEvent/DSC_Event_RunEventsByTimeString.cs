@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using DSC.Core;
 using UnityEngine;
 using UnityEngine.Events;
@@ -105,7 +103,7 @@ namespace DSC.Event.Helper
                 if (m_fCurrentTimeCount >= m_fWaitDuration)
                 {
                     if (IsPassCondition())
-                        RunEvent();
+                        RunEventImmediate();
                     else if (m_bResetCountWhenRunSuccess)
                         return;
 
@@ -121,24 +119,35 @@ namespace DSC.Event.Helper
 
         #region Main
 
+        public void StopTimeCount()
+        {
+            m_bCounting = false;
+        }
+
         public void ResetTimeCount()
         {
             m_fCurrentTimeCount = 0;
         }
 
-        public void StartTimeCount(string sValue)
+        public void RunEvent()
+        {
+            ResetTimeCount();
+            m_bCounting = true;
+        }
+
+        public void RunEvent(string sValue)
         {
             m_hSendString = sValue;
             ResetTimeCount();
             m_bCounting = true;
         }
 
-        public void RunEvent()
+        public void RunEventImmediate()
         {
             m_hEvent?.Invoke(m_hSendString);
         }
 
-        public void RunEvent(string sValue)
+        public void RunEventImmediate(string sValue)
         {
             m_hEvent?.Invoke(sValue);
         }
