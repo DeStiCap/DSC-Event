@@ -1,27 +1,30 @@
-﻿using UnityEngine;
+﻿using DSC.Core;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace DSC.Event.Helper
 {
     public class DSC_Event_Int : MonoBehaviour
     {
-        #region Temp
-
-        [System.Serializable]
-        protected class EventInt : UnityEvent<int> { }
-
-        #endregion
-
         #region Variable
 
         #region Variable - Inspector
-#pragma warning disable 0649
 
+#if UNITY_EDITOR
+
+        [TextField("Events Description", 3)]
+        [SerializeField] string m_sDescription;
+
+#endif
+
+        [Header("Int Event")]
         [SerializeField] protected int m_nInt;
-        [SerializeField] protected EventInt m_hEvent;
+        [SerializeField] protected EventCondition[] m_arrCondition;
+        [SerializeField] protected UnityEvent<int> m_hEvent;
 
-#pragma warning restore 0649
         #endregion
+
+        protected EventConditionData m_hConditionData;
 
         #endregion
 
@@ -66,6 +69,20 @@ namespace DSC.Event.Helper
                 return;
 
             m_hEvent?.Invoke(nResult);
+        }
+
+        public void SetEvent(UnityEvent<int> hEvent)
+        {
+            m_hEvent = hEvent;
+        }
+
+        #endregion
+
+        #region Helper
+
+        protected bool IsPassCondition()
+        {
+            return m_arrCondition.PassAllCondition(m_hConditionData);
         }
 
         #endregion

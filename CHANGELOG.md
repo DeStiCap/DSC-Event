@@ -1,3 +1,8 @@
+## [0.4.5-preview.1] -2020-06-05
+- Added SetEvent method in DSC_Event_String, DSC_Event_Int, DSC_Event_Float, DSC_Event_Bool class.
+- Added event condition support in DSC_Event_String, DSC_Event_Int, DSC_Event_Float, DSC_Event_Bool class.
+- Added events description field in DSC_Event_String, DSC_Event_Int, DSC_Event_Float, DSC_Event_Bool class.
+
 ## [0.4.4-preview.1] -2020-05-05
 - Added DSC_Event_RunEventsByEventString class.
 - Added StopTimeCount method in DSC_Event_RunEventsByTime class.
