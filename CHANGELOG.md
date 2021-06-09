@@ -1,15 +1,18 @@
-## [0.4.5-preview.1] -2020-06-05
+## [0.4.6-preview.1] - 2020-06-09
+- Added DSC_Event_RunEventsByAnimation class.
+
+## [0.4.5-preview.1] - 2020-06-05
 - Added SetEvent method in DSC_Event_String, DSC_Event_Int, DSC_Event_Float, DSC_Event_Bool class.
 - Added event condition support in DSC_Event_String, DSC_Event_Int, DSC_Event_Float, DSC_Event_Bool class.
 - Added events description field in DSC_Event_String, DSC_Event_Int, DSC_Event_Float, DSC_Event_Bool class.
 
-## [0.4.4-preview.1] -2020-05-05
+## [0.4.4-preview.1] - 2020-05-05
 - Added DSC_Event_RunEventsByEventString class.
 - Added StopTimeCount method in DSC_Event_RunEventsByTime class.
 - Added StopTimeCount method in DSC_Event_RunEventsByTimeGameObject class.
 - DSC_Event_RunEventsByTime now has events description field.
 
-## [0.4.3-preview.1] -2020-05-04
+## [0.4.3-preview.1] - 2020-05-04
 - Added DSC_Event_RunEventsByTimeString script.
 - Rename DSC_Event_RunEventsByTime_GameObject script to DSC_Event_RunEventsByTimeGameObject.
 - DSC_Event_RunEventsByTimeGameObject now has events description field.
@@ -17,14 +20,14 @@
 ## [0.4.2-preview.1] -2020-04-21
 - Add EventFlagCallback script.
 
-## [0.4.1-preview.1] -2020-04-20
+## [0.4.1-preview.1] - 2020-04-20
 - Add DSC.Event assembly definition root namespace.
 
-## [0.4.0-preview.1] -2020-02-07
+## [0.4.0-preview.1] - 2020-02-07
 - Change minimum Unity version requirement to 2020.2
 - DSC_Event_RunEventsByLinecast 3D/2D now send RaycastHit data.
 
-## [0.3.0-preview.1] -2020-07-03
+## [0.3.0-preview.1] - 2020-07-03
 - Change minimum Unity version requirement to 2019.4
 - Remove Unity Input dependencies.
 - Move DSC_Event_RunEventsByInputButton to DSC-Input package instead.

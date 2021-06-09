@@ -28,6 +28,15 @@ namespace DSC.Event.Helper
 
         #endregion
 
+        #region Unity
+
+        protected virtual void Awake()
+        {
+            m_hConditionData = new EventConditionData(transform);
+        }
+
+        #endregion
+
         #region Main
 
         public void SetString(string sString)
