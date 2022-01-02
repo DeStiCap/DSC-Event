@@ -9,7 +9,16 @@ namespace DSC.Event.Helper
         #region Variable
 
         #region Variable - Inspector
-#pragma warning disable 0649
+
+#if UNITY_EDITOR
+
+        [TextField("Events Description", 3)]
+        [SerializeField] string m_sDescription;
+
+#endif
+
+        [TagField]
+        [SerializeField] protected string[] m_arrTargetTag;
 
         [Header("Condition")]
         [SerializeField] protected EventCondition[] m_arrCondition;
@@ -22,16 +31,31 @@ namespace DSC.Event.Helper
         [Header("Event Send Data")]
         [SerializeField] protected EventGameObject m_hEnterEventGameObject;
         [SerializeField] protected EventGameObject m_hStayEventGameObject;
-        [SerializeField] protected EventGameObject m_hExitEventGameObject;        
+        [SerializeField] protected EventGameObject m_hExitEventGameObject;
 
-#pragma warning restore 0649
+        #endregion
+
+        #region Variable - Property
+
+        public string[] targetTagArray
+        {
+            get { return m_arrTargetTag; }
+            set
+            {
+                if (value == null)
+                    return;
+
+                m_arrTargetTag = value;
+            }
+        }
+
         #endregion
 
         protected EventConditionData m_hConditionData;
 
         #endregion
 
-        #region Base - Mono
+        #region Unity
 
         protected virtual void Awake()
         {
@@ -40,6 +64,9 @@ namespace DSC.Event.Helper
 
         protected virtual void OnTriggerEnter(Collider other)
         {
+            if (m_arrTargetTag.HasData() && !other.CompareTag(m_arrTargetTag))
+                return;
+
             if (!IsPassCondition())
                 return;
 
@@ -49,6 +76,9 @@ namespace DSC.Event.Helper
 
         protected virtual void OnTriggerStay(Collider other)
         {
+            if (m_arrTargetTag.HasData() && !other.CompareTag(m_arrTargetTag))
+                return;
+
             if (!IsPassCondition())
                 return;
 
@@ -58,6 +88,9 @@ namespace DSC.Event.Helper
 
         protected virtual void OnTriggerExit(Collider other)
         {
+            if (m_arrTargetTag.HasData() && !other.CompareTag(m_arrTargetTag))
+                return;
+
             if (!IsPassCondition())
                 return;
 

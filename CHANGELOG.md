@@ -1,3 +1,7 @@
+## [0.4.7-preview.1] - 2021-02-01
+- Added tag filter support in DSC_Event_RunEventsByTrigger, DSC_Event_RunEventsByTrigger2D class.
+- Added events description field in DSC_Event_RunEventsByTrigger, DSC_Event_RunEventsByTrigger2D class.
+
 ## [0.4.6-preview.1] - 2020-06-09
 - Added DSC_Event_RunEventsByAnimation class.
 
